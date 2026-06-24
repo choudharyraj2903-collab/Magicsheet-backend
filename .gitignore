@@ -1,0 +1,91 @@
+# =========================
+# Go
+# =========================
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+*.test
+*.out
+coverage.out
+
+# Go workspace
+go.work
+go.work.sum
+
+# =========================
+# Environment Files
+# =========================
+.env
+.env.local
+.env.*.local
+
+# =========================
+# IDEs
+# =========================
+
+# VS Code
+.vscode/
+
+# JetBrains (GoLand)
+.idea/
+
+# Vim
+*.swp
+*.swo
+
+# =========================
+# Logs
+# =========================
+logs/
+*.log
+
+# =========================
+# Build Artifacts
+# =========================
+bin/
+dist/
+build/
+
+# =========================
+# OS Files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Docker
+# =========================
+docker-data/
+postgres-data/
+
+# =========================
+# Temporary Files
+# =========================
+tmp/
+temp/
+
+# =========================
+# Test Results
+# =========================
+coverage/
+*.coverprofile
+
+# =========================
+# Generated Documentation
+# =========================
+docs/swagger/
+
+# =========================
+# Air (Hot Reload)
+# =========================
+.air/
+
+# =========================
+# Local Database Files
+# =========================
+*.db
+*.sqlite
+*.sqlite3
