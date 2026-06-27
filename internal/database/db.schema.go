@@ -72,7 +72,7 @@ type User struct {
 	Email    string   `gorm:"type:varchar(255);uniqueIndex:idx_user_email;not null"          json:"email"`
 	Role     UserRole `gorm:"type:varchar(20);not null;index:idx_user_role"                  json:"role"`
 	IsActive bool     `gorm:"default:true;not null"                                          json:"is_active"`
-
+	HashPassword string `gorm:"not null"			json:"hash_password"`
 	Assignments []CoordinatorAssignment `gorm:"foreignKey:UserID" json:"assignments,omitempty"`
 }
 
@@ -83,12 +83,10 @@ type Company struct {
 	UpdatedAt time.Time      `                                                               json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index"                                                   json:"-"`
 
-	ExternalID   string    `gorm:"type:varchar(100);uniqueIndex:idx_company_ext;not null"     json:"external_id"`
+	ExternalID   string    `gorm:"type:varchar(225);uniqueIndex:idx_company_ext;not null"     json:"external_id"`
 	Name         string    `gorm:"type:varchar(255);not null"                                 json:"name"`
 	Industry     string    `gorm:"type:varchar(150)"                                          json:"industry"`
-	Website      string    `gorm:"type:varchar(500)"                                          json:"website"`
-	LogoURL      string    `gorm:"type:varchar(500)"                                          json:"logo_url"`
-	LastSyncedAt time.Time `gorm:"not null;index:idx_company_sync"                            json:"last_synced_at"`
+	LastSyncedAt time.Time `gorm:"not null"                            json:"last_synced_at"`
 
 
 	Proformas []Proforma `gorm:"foreignKey:CompanyID" json:"proformas,omitempty"`
@@ -101,7 +99,7 @@ type Proforma struct {
 	UpdatedAt time.Time      `                                                               json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index"                                                   json:"-"`
 
-	ExternalID        string    `gorm:"type:varchar(100);uniqueIndex:idx_proforma_ext;not null" json:"external_id"`
+	ExternalID        string    `gorm:"type:varchar(225);uniqueIndex:idx_proforma_ext;not null" json:"external_id"`
 	CompanyID         uint      `gorm:"not null;index:idx_proforma_company"                     json:"company_id"`
 	Company           Company   `gorm:"constraint:OnDelete:RESTRICT"                            json:"company,omitempty"`
 	Title             string    `gorm:"type:varchar(255);not null"                              json:"title"`
@@ -110,11 +108,10 @@ type Proforma struct {
 	ProformaType      string    `gorm:"type:varchar(50);index:idx_proforma_type"                json:"proforma_type"`
 	IsInterviewActive bool      `gorm:"default:false;not null;index:idx_proforma_active"        json:"is_interview_active"`
 	LastSyncedAt      time.Time `gorm:"not null"                                                json:"last_synced_at"`
-
 	// Reverse relations
 	Candidates      []ProformaCandidate    `gorm:"foreignKey:ProformaID" json:"candidates,omitempty"`
 	InterviewRounds []InterviewRound       `gorm:"foreignKey:ProformaID" json:"interview_rounds,omitempty"`
-	Assignments     []CoordinatorAssignment `gorm:"foreignKey:ProformaID" json:"assignments,omitempty"`
+	CoordinatorAssignments     []CoordinatorAssignment `gorm:"foreignKey:ProformaID" json:"CoordinatorAssignments,omitempty"`
 }
 
 
@@ -220,6 +217,21 @@ type SyncLog struct {
 }
 
 
+//for auth 
+type RefreshToken struct {
+    ID        uint           `gorm:"primaryKey"`
+    CreatedAt time.Time
+    UpdatedAt time.Time
+    DeletedAt gorm.DeletedAt `gorm:"index"`
+
+    UserID       uint      `gorm:"not null;index"`
+    User         User      `gorm:"constraint:OnDelete:CASCADE"`
+
+    TokenHash    string    `gorm:"not null"`
+    ExpiresAt    time.Time `gorm:"not null"`
+    RevokedAt    *time.Time
+}
+
 func AutoMigrate(db *gorm.DB) error {
 	return db.AutoMigrate(
 		&User{},
@@ -231,6 +243,7 @@ func AutoMigrate(db *gorm.DB) error {
 		&InterviewSession{},
 		&CoordinatorAssignment{},
 		&SyncLog{},
+		&RefreshToken{},
 	)
 }
 
