@@ -16,7 +16,7 @@ func main() {
 	r := gin.Default()
 	api := r.Group("/api")
 
-	auth.RegisterRoutes(api)
+	auth.RegisterRoutes(api, &auth.Handler{})
 
 
 	db, err := database.InitDB()
