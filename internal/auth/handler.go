@@ -20,8 +20,18 @@ func NewHandler(service *Service) *Handler {
 
 
 func (h *Handler) Login(c *gin.Context) {
+	var req LoginRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error" : "invalid request body",
+		})
+		return
+	}
+	
 	c.JSON(http.StatusOK, gin.H{
-		"message" : "Login Endpoint reached",
+		"message" : "request parsed successfully",
+		"email" : req.Email,
 	})
 }
 

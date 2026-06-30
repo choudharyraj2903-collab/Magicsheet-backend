@@ -9,25 +9,33 @@ import (
 
 func main() {
 	if err := godotenv.Load("../../.env"); err != nil {
-		godotenv.Load(".env") // fallback if run from project root
+		godotenv.Load(".env") 
 	}
 
-	//creating the defualt gin router read from here 
+	//creating router
 	r := gin.Default()
 	api := r.Group("/api")
 
-	auth.RegisterRoutes(api, &auth.Handler{})
-
-
-	db, err := database.InitDB()
+	
+	//db init
+	db, err := database.InitDB()	
 	if err != nil {
 		panic(err)
 	}
+	
+	//depedency injection
+	repo := auth.NewRepository(db)
+	service := auth.NewService(repo)
+	handler := auth.NewHandler(service)
+	auth.RegisterRoutes(api, handler)
+	
 
+	//migration
 	if err := database.AutoMigrate(db); err != nil {
 		panic(err)
 	}
 
+	//health check
 	r.GET("/health",func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"status" : "ok",
