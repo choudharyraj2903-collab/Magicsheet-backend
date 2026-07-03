@@ -76,6 +76,16 @@ type User struct {
 	Assignments []CoordinatorAssignment `gorm:"foreignKey:UserID" json:"assignments,omitempty"`
 }
 
+type RecruitmentCycle struct {
+    ID           uint
+    AcademicYear string // 2026-27
+    Type         string // Internship / Placement
+    Phase        string // Phase 1 / Phase 2
+    StartDate    time.Time
+    IsActive     bool
+
+    Proformas []Proforma
+}
 
 type Company struct {
 	ID        uint           `gorm:"primaryKey"                                              json:"id"`
@@ -86,7 +96,7 @@ type Company struct {
 	ExternalID   string    `gorm:"type:varchar(225);uniqueIndex:idx_company_ext;not null"     json:"external_id"`
 	Name         string    `gorm:"type:varchar(255);not null"                                 json:"name"`
 	Industry     string    `gorm:"type:varchar(150)"                                          json:"industry"`
-	LastSyncedAt time.Time `gorm:"not null"                            json:"last_synced_at"`
+	LastSyncedAt time.Time `gorm:"not null"                            						  json:"last_synced_at"`
 
 
 	Proformas []Proforma `gorm:"foreignKey:CompanyID" json:"proformas,omitempty"`
@@ -94,26 +104,30 @@ type Company struct {
 
 
 type Proforma struct {
-	ID        uint           `gorm:"primaryKey"                                              json:"id"`
-	CreatedAt time.Time      `                                                               json:"created_at"`
-	UpdatedAt time.Time      `                                                               json:"updated_at"`
-	DeletedAt gorm.DeletedAt `gorm:"index"                                                   json:"-"`
+	ID        uint           `gorm:"primaryKey" json:"id"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 
-	ExternalID        string    `gorm:"type:varchar(225);uniqueIndex:idx_proforma_ext;not null" json:"external_id"`
-	CompanyID         uint      `gorm:"not null;index:idx_proforma_company"                     json:"company_id"`
-	Company           Company   `gorm:"constraint:OnDelete:RESTRICT"                            json:"company,omitempty"`
-	Title             string    `gorm:"type:varchar(255);not null"                              json:"title"`
-	RoleOffered       string    `gorm:"type:varchar(255)"                                       json:"role_offered"`
-	Description       string    `gorm:"type:text"                                               json:"description"`
-	ProformaType      string    `gorm:"type:varchar(50);index:idx_proforma_type"                json:"proforma_type"`
-	IsInterviewActive bool      `gorm:"default:false;not null;index:idx_proforma_active"        json:"is_interview_active"`
-	LastSyncedAt      time.Time `gorm:"not null"                                                json:"last_synced_at"`
-	// Reverse relations
-	Candidates      []ProformaCandidate    `gorm:"foreignKey:ProformaID" json:"candidates,omitempty"`
-	InterviewRounds []InterviewRound       `gorm:"foreignKey:ProformaID" json:"interview_rounds,omitempty"`
-	CoordinatorAssignments     []CoordinatorAssignment `gorm:"foreignKey:ProformaID" json:"CoordinatorAssignments,omitempty"`
+	RecruitmentCycleID uint             `gorm:"not null;index:idx_proforma_cycle" json:"recruitment_cycle_id"`
+	RecruitmentCycle   RecruitmentCycle `gorm:"constraint:OnDelete:RESTRICT" json:"recruitment_cycle,omitempty"`
+
+	ExternalID string `gorm:"type:varchar(225);uniqueIndex:idx_proforma_ext;not null" json:"external_id"`
+
+	CompanyID uint    `gorm:"not null;index:idx_proforma_company" json:"company_id"`
+	Company   Company `gorm:"constraint:OnDelete:RESTRICT" json:"company,omitempty"`
+
+	Title             string    `gorm:"type:varchar(255);not null" json:"title"`
+	RoleOffered       string    `gorm:"type:varchar(255)" json:"role_offered"`
+	Description       string    `gorm:"type:text" json:"description"`
+	ProformaType      string    `gorm:"type:varchar(50);index:idx_proforma_type" json:"proforma_type"`
+	IsInterviewActive bool      `gorm:"default:false;not null;index:idx_proforma_active" json:"is_interview_active"`
+	LastSyncedAt      time.Time `gorm:"not null" json:"last_synced_at"`
+
+	Candidates              []ProformaCandidate    `gorm:"foreignKey:ProformaID" json:"candidates,omitempty"`
+	InterviewRounds         []InterviewRound       `gorm:"foreignKey:ProformaID" json:"interview_rounds,omitempty"`
+	CoordinatorAssignments  []CoordinatorAssignment `gorm:"foreignKey:ProformaID" json:"coordinator_assignments,omitempty"`
 }
-
 
 type Student struct {
 	ID        uint           `gorm:"primaryKey"                                              json:"id"`
@@ -218,19 +232,19 @@ type SyncLog struct {
 
 
 //for auth 
-type RefreshToken struct {
-    ID        uint           `gorm:"primaryKey"`
-    CreatedAt time.Time
-    UpdatedAt time.Time
-    DeletedAt gorm.DeletedAt `gorm:"index"`
+// type RefreshToken struct {
+//     ID        uint           `gorm:"primaryKey"`
+//     CreatedAt time.Time
+//     UpdatedAt time.Time
+//     DeletedAt gorm.DeletedAt `gorm:"index"`
 
-    UserID       uint      `gorm:"not null;index"`
-    User         User      `gorm:"constraint:OnDelete:CASCADE"`
+//     UserID       uint      `gorm:"not null;index"`
+//     User         User      `gorm:"constraint:OnDelete:CASCADE"`
 
-    TokenHash    string    `gorm:"not null"`
-    ExpiresAt    time.Time `gorm:"not null"`
-    RevokedAt    *time.Time
-}
+//     TokenHash    string    `gorm:"not null"`
+//     ExpiresAt    time.Time `gorm:"not null"`
+//     RevokedAt    *time.Time
+// }
 
 func AutoMigrate(db *gorm.DB) error {
 	return db.AutoMigrate(
@@ -243,7 +257,7 @@ func AutoMigrate(db *gorm.DB) error {
 		&InterviewSession{},
 		&CoordinatorAssignment{},
 		&SyncLog{},
-		&RefreshToken{},
+		&RecruitmentCycle{},
 	)
 }
 

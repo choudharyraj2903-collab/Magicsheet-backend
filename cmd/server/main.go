@@ -1,10 +1,12 @@
 package main
 
 import (
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/spo-iitk/Magicsheet-backend/internal/auth"
 	"github.com/spo-iitk/Magicsheet-backend/internal/database"
+	"github.com/spo-iitk/Magicsheet-backend/internal/middleware"
 )
 
 func main() {
@@ -14,6 +16,9 @@ func main() {
 
 	//creating router
 	r := gin.Default()
+
+	//cors 
+	r.Use(cors.New(middleware.CORS()))
 	api := r.Group("/api")
 
 	
