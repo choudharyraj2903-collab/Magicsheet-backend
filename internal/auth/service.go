@@ -39,6 +39,7 @@ func (s *Service) Login(ctx context.Context, req LoginRequest) (*LoginResponse, 
 	if err != nil {
 		return nil, err
 	}
+	
 	return &LoginResponse{
 		AccessToken: token,
 	}, nil 

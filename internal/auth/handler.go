@@ -10,8 +10,6 @@ type Handler struct {
 	service *Service
 }
 
-// dependency injection 
-
 func NewHandler(service *Service) *Handler {
 	return &Handler{
 		service: service,
@@ -46,5 +44,12 @@ func (h *Handler) Login(c *gin.Context) {
 func (h *Handler )Logout(c *gin.Context){
 	c.JSON(http.StatusOK, gin.H{
 		"message" : "logout endpoint reached",
+	})
+}
+
+
+func (h *Handler)Me(c *gin.Context){
+	c.JSON(http.StatusOK, gin.H{
+		"message" : "the me section of the page",
 	})
 }
