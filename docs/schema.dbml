@@ -1,0 +1,187 @@
+// Database Markup Language (DBML) Schema for MagicSheet Backend
+// Copy and paste this directly into the dbdiagram.io editor
+
+Table users {
+  id bigserial [pk]
+  created_at timestamptz
+  updated_at timestamptz
+  deleted_at timestamptz
+  name varchar(150) [not null]
+  email varchar(255) [not null]
+  role varchar(20) [not null]
+  is_active boolean [not null, default: true]
+  hash_password text [not null]
+
+  Indexes {
+    deleted_at [name: 'idx_users_deleted_at']
+    email [unique, name: 'idx_user_email']
+    role [name: 'idx_user_role']
+  }
+}
+
+Table recruitment_cycles {
+  id bigserial [pk]
+  created_at timestamptz
+  updated_at timestamptz
+  deleted_at timestamptz
+  academic_year varchar(20) [not null]
+  type varchar(50) [not null]
+  phase varchar(50) [not null]
+  is_active boolean [not null, default: false]
+
+  Indexes {
+    deleted_at [name: 'idx_recruitment_cycles_deleted_at']
+    is_active [name: 'idx_rc_active']
+  }
+}
+
+Table students {
+  id bigserial [pk]
+  created_at timestamptz
+  updated_at timestamptz
+  deleted_at timestamptz
+  roll_number varchar(50) [not null]
+  name varchar(150) [not null]
+  department varchar(100) [not null]
+  program varchar(100) [not null]
+  email varchar(255)
+  phone varchar(20)
+  current_status varchar(30) [not null, default: 'available']
+  is_frozen boolean [not null, default: false]
+  last_synced_at timestamptz [not null]
+
+  Indexes {
+    deleted_at [name: 'idx_students_deleted_at']
+    roll_number [unique, name: 'idx_student_roll']
+    department [name: 'idx_student_dept']
+    current_status [name: 'idx_student_status']
+    is_frozen [name: 'idx_student_frozen']
+  }
+}
+
+Table sync_logs {
+  id bigserial [pk]
+  created_at timestamptz
+  entity_type varchar(50) [not null]
+  external_id varchar(100)
+  action varchar(20) [not null]
+  records_count integer [not null, default: 0]
+  status varchar(20) [not null]
+  error_message text
+  sync_duration integer [not null]
+
+  Indexes {
+    entity_type [name: 'idx_sync_entity']
+    external_id [name: 'idx_sync_external']
+    status [name: 'idx_sync_status']
+  }
+}
+
+Table proformas {
+  id bigserial [pk]
+  created_at timestamptz
+  updated_at timestamptz
+  deleted_at timestamptz
+  recruitment_cycle_id bigint [not null]
+  external_id varchar(225) [not null]
+  company_id bigint [not null]
+  title varchar(255) [not null]
+  role_offered varchar(255)
+  description text
+  proforma_type varchar(50)
+  is_interview_active boolean [not null, default: false]
+  last_synced_at timestamptz [not null]
+
+  Indexes {
+    deleted_at [name: 'idx_proformas_deleted_at']
+    recruitment_cycle_id [name: 'idx_proforma_cycle']
+    external_id [unique, name: 'idx_proforma_ext']
+    company_id [name: 'idx_proforma_company']
+    proforma_type [name: 'idx_proforma_type']
+    is_interview_active [name: 'idx_proforma_active']
+  }
+}
+
+Table proforma_candidates {
+  id bigserial [pk]
+  created_at timestamptz
+  updated_at timestamptz
+  proforma_id bigint [not null]
+  student_id bigint [not null]
+  source varchar(20) [not null]
+  added_by_id bigint
+
+  Indexes {
+    (proforma_id, student_id) [unique, name: 'idx_candidate_proforma_student']
+    student_id [name: 'idx_candidate_student']
+    source [name: 'idx_candidate_source']
+    added_by_id [name: 'idx_candidate_added_by']
+  }
+}
+
+Table interview_rounds {
+  id bigserial [pk]
+  created_at timestamptz
+  updated_at timestamptz
+  proforma_id bigint [not null]
+  name varchar(100) [not null]
+  round_number integer [not null]
+
+  Indexes {
+    (proforma_id, round_number) [unique, name: 'idx_round_proforma_number']
+    proforma_id [name: 'idx_round_proforma']
+  }
+}
+
+Table interview_sessions {
+  id bigserial [pk]
+  created_at timestamptz
+  updated_at timestamptz
+  proforma_candidate_id bigint [not null]
+  round_id bigint [not null]
+  conducted_by_id bigint [not null]
+  in_time timestamptz
+  out_time timestamptz
+  status varchar(20) [not null, default: 'waiting']
+  remarks text
+
+  Indexes {
+    (proforma_candidate_id, round_id) [unique, name: 'idx_session_candidate_round']
+    proforma_candidate_id [name: 'idx_session_candidate']
+    round_id [name: 'idx_session_round']
+    conducted_by_id [name: 'idx_session_conductor']
+    in_time [name: 'idx_session_intime']
+    status [name: 'idx_session_status']
+  }
+}
+
+Table coordinator_assignments {
+  id bigserial [pk]
+  created_at timestamptz
+  updated_at timestamptz
+  proforma_id bigint [not null]
+  user_id bigint [not null]
+  role varchar(10) [not null]
+  assigned_by_id bigint [not null]
+  is_active boolean [not null, default: true]
+
+  Indexes {
+    (proforma_id, user_id, role) [unique, name: 'idx_assign_proforma_user_role']
+    proforma_id [name: 'idx_assign_proforma']
+    user_id [name: 'idx_assign_user']
+    assigned_by_id [name: 'idx_assign_by']
+  }
+}
+
+// Relationships & Foreign Keys
+Ref: proformas.recruitment_cycle_id > recruitment_cycles.id [delete: restrict]
+Ref: proforma_candidates.proforma_id > proformas.id [delete: cascade]
+Ref: proforma_candidates.student_id > students.id [delete: restrict]
+Ref: proforma_candidates.added_by_id > users.id [delete: set null]
+Ref: interview_rounds.proforma_id > proformas.id [delete: cascade]
+Ref: interview_sessions.proforma_candidate_id > proforma_candidates.id [delete: restrict]
+Ref: interview_sessions.round_id > interview_rounds.id [delete: restrict]
+Ref: interview_sessions.conducted_by_id > users.id [delete: restrict]
+Ref: coordinator_assignments.proforma_id > proformas.id [delete: cascade]
+Ref: coordinator_assignments.user_id > users.id [delete: restrict]
+Ref: coordinator_assignments.assigned_by_id > users.id [delete: restrict]
