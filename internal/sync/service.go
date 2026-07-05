@@ -2,6 +2,7 @@ package sync
 
 import (
 	"context"
+	"fmt"
 )
 
 type Service struct {
@@ -20,6 +21,14 @@ func (s *Service) SyncProformas(ctx context.Context) error {
 	return nil
 }
 
-func (s *Service) SyncStudents(c context.Context) error {
+func (s *Service) SyncStudents(ctx context.Context) error {
+	rc, err := s.rasRepo.GetActiveRecuritmentCycle(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("%+v\n", rc)
+
 	return nil
 }

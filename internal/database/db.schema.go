@@ -143,7 +143,7 @@ type Student struct {
 
 	// Reverse relations
 	Candidacies []ProformaCandidate `gorm:"foreignKey:StudentID" json:"candidacies,omitempty"`
-	Sessions    []InterviewSession  `gorm:"foreignKey:StudentID" json:"sessions,omitempty"`
+	// Sessions    []InterviewSession  `gorm:"foreignKey:StudentID" json:"sessions,omitempty"`
 }
 
 type ProformaCandidate struct {

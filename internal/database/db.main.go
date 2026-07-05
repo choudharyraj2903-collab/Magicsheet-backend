@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func InitDB() (*gorm.DB, error) {
+func InitPIBSDB() (*gorm.DB, error) {
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Shanghai",
 		os.Getenv("POSTGRES_HOST"),
@@ -43,6 +43,8 @@ func InitRASDB() (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Println("!!--------Connnected to Ras database--------!!")
 
 	return db, nil
 
