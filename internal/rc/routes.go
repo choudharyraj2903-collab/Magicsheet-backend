@@ -25,4 +25,5 @@ func RegisterRoutes(api *gin.RouterGroup, handler *Handler) {
 	assign.Use(middleware.RequireRoles("opc", "apc"))
 	assign.POST("/assign", handler.AssignMagicsheet)
 	assign.GET("/unassigned/:role", handler.GetUnassignedUsers)
+	assign.GET("/assigned", handler.GetAssignedUsers)
 }
