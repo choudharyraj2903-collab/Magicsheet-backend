@@ -106,6 +106,7 @@ func (h *Handler) GetAssignedUsers(c *gin.Context) {
 }
 
 
+// GetAssignment returns an existing CoordinatorAssignment for (proforma, user, role), or nil if not found.
 func (r *Repository) GetAssignment(ctx context.Context, proformaID, userID uint, role database.AssignmentRole) (*database.CoordinatorAssignment, error) {
 	var a database.CoordinatorAssignment
 	err := r.db.WithContext(ctx).
