@@ -35,7 +35,7 @@ type AssignedUser struct {
 type ProformaWithAssignment struct {
 	ID                 uint   `json:"id"`
 	RecruitmentCycleID uint   `json:"recruitment_cycle_id"`
-	CompanyID          uint   `json:"company_id"`
+	
 	Title              string `json:"title"`
 	RoleOffered        string `json:"role_offered"`
 	Description        string `json:"description"`
